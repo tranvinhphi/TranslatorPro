@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Translator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+
+<body>
+  <!-- ═══════════════════ OVERLAY VIEW ═══════════════════ -->
+  <div id="overlay-view" class="view active">
+    <!-- Drag Region (title bar area) -->
+    <div id="drag-region" data-tauri-drag-region>
+      <div class="control-bar" data-tauri-drag-region>
+        <button id="btn-settings" class="icon-btn" title="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <span id="settings-badge" class="settings-badge" style="display:none"></span>
+        </button>
+
+        <div class="status-area" data-tauri-drag-region>
+          <span id="status-indicator" class="status-dot disconnected"></span>
+          <span id="status-text" class="status-text">Ready</span>
+        </div>
+
+        <div class="source-controls">
+          <button id="btn-source-system" class="source-btn active" title="System Audio (⌘1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+          </button>
+          <button id="btn-source-mic" class="source-btn" title="Microphone (⌘2)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="23" />
+              <line x1="8" y1="23" x2="16" y2="23" />
+            </svg>
+          </button>
+        </div>
+
+        <button id="btn-start" class="action-btn" title="Start/Stop (Space)">
+          <svg id="icon-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          <svg id="icon-stop" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+            <rect x="4" y="4" width="16" height="16" rx="2" />
+          </svg>
+        </button>
+
+        <button id="btn-tts" class="tts-action-btn" title="TTS Narration (⌘T)">
+          <svg id="icon-tts-off" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            <line x1="9" y1="10" x2="15" y2="10" />
+          </svg>
+          <svg id="icon-tts-on" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            <path d="M9 10h2" /><path d="M13 8v4" /><path d="M15 10h1" />
+          </svg>
+          <span class="tts-label">TTS</span>
+        </button>
+
+        <div class="toolbar-group">
+          <button id="btn-clear" class="icon-btn" title="Clear transcript">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            </svg>
+          </button>
+
+          <button id="btn-copy" class="icon-btn" title="Copy transcript">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+          </button>
+
+          <button id="btn-open-transcripts" class="icon-btn" title="Open saved transcripts">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+          </button>
+        </div>
+
+        <button id="btn-compact" class="icon-btn" title="Compact mode — hide control bar">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="4 14 10 14 10 20" />
+            <polyline points="20 10 14 10 14 4" />
+            <line x1="14" y1="10" x2="21" y2="3" />
+            <line x1="3" y1="21" x2="10" y2="14" />
+          </svg>
+        </button>
+
+        <button id="btn-pin" class="icon-btn active" title="Pin on top (always visible)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 17v5" />
+            <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76z" />
+          </svg>
+        </button>
+
+        <button id="btn-minimize" class="icon-btn" title="Minimize to taskbar">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
+
+        <button id="btn-close" class="icon-btn close-btn" title="Close">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Transcript Area -->
+    <div id="transcript-container" data-tauri-drag-region>
+      <div id="transcript-content" data-tauri-drag-region>
+        <div class="transcript-placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            opacity="0.4">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" y1="19" x2="12" y2="23" />
+            <line x1="8" y1="23" x2="16" y2="23" />
+          </svg>
+          <p>Press ▶ to start translating</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating controls (bottom) -->
+    <div class="floating-controls">
+      <div class="font-controls">
+        <button id="btn-font-down" class="float-btn" title="Decrease font size">A−</button>
+        <span id="font-size-display" class="font-size-label">16</span>
+        <button id="btn-font-up" class="float-btn" title="Increase font size">A+</button>
+      </div>
+      <div class="color-controls">
+        <button class="color-dot active" data-color="#ffffff" title="White" style="background:#ffffff;"></button>
+        <button class="color-dot" data-color="#ffd700" title="Yellow" style="background:#ffd700;"></button>
+        <button class="color-dot" data-color="#00e5ff" title="Cyan" style="background:#00e5ff;"></button>
+      </div>
+      <button id="btn-view-mode" class="float-btn" title="Toggle dual view">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="18" rx="1" />
+          <rect x="14" y="3" width="7" height="18" rx="1" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Resize Handle -->
+    <div id="resize-handle"></div>
+  </div>
+
+  <!-- ═══════════════════ SETTINGS VIEW ═══════════════════ -->
+  <div id="settings-view" class="view">
+    <div id="settings-drag" data-tauri-drag-region>
+      <div class="settings-header">
+        <button id="btn-back" class="icon-btn" title="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+        </button>
+        <h2>Settings</h2>
+        <button id="btn-save-settings-top" class="icon-btn save-btn-top" title="Save & Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-body">
+      <!-- Tab Bar -->
+      <div class="settings-tabs">
+        <button class="settings-tab active" data-tab="tab-translation">Translation</button>
+        <button class="settings-tab" data-tab="tab-display">Display</button>
+        <button class="settings-tab" data-tab="tab-tts">TTS</button>
+        <button class="settings-tab" data-tab="tab-about">About</button>
+      </div>
+
+      <!-- Tab: Translation -->
+      <div class="settings-tab-content active" id="tab-translation">
+        <div class="settings-section">
+          <span class="field-label">Engine</span>
+          <select id="select-translation-mode">
+            <option value="free">🆓 Free (Whisper + MyMemory) — Miễn phí</option>
+            <option value="soniox">☁️ Soniox API (Cloud) — Trả phí</option>
+            <option value="local">🖥️ Local MLX (macOS Apple Silicon)</option>
+          </select>
+          <p class="hint" id="hint-mode-free">🆓 Hoàn toàn miễn phí — Whisper local + dịch online không cần key (~2-4s delay)</p>
+          <p class="hint" id="hint-mode-soniox" style="display:none">Realtime cao cấp, 70+ ngôn ngữ, ~$0.12/hr</p>
+          <p class="hint" id="hint-mode-local" style="display:none">Offline hoàn toàn, chỉ macOS Apple Silicon, ~3-4s delay</p>
+        </div>
+
+        <div class="settings-section" id="section-api-key">
+          <span class="field-label">Soniox API Key <span class="required-badge">Required</span></span>
+          <div class="input-group">
+            <input type="password" id="input-api-key" placeholder="Enter your Soniox API key..." autocomplete="off" />
+            <button id="btn-toggle-key" class="icon-btn small" title="Show/Hide">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+          <p class="hint">Get key at <a href="#" id="link-soniox">console.soniox.com</a></p>
+        </div>
+
+        <!-- Free pipeline settings -->
+        <div class="settings-section" id="section-free-settings">
+          <span class="field-label">Whisper Model</span>
+          <select id="select-whisper-model">
+            <option value="tiny">⚡ tiny — Rất nhanh, chất lượng cơ bản (~75MB)</option>
+            <option value="base">🔹 base — Nhanh, chất lượng khá (~145MB)</option>
+            <option value="small" selected>⭐ small — Cân bằng tốt, khuyến nghị (~466MB)</option>
+            <option value="medium">🔶 medium — Chất lượng cao (~1.5GB)</option>
+            <option value="large-v3">💎 large-v3 — Tốt nhất, cần GPU/RAM mạnh (~3GB)</option>
+          </select>
+          <p class="hint" style="margin-top:6px;">Model sẽ được tải tự động lần đầu tiên. Cần cài: <code>pip install faster-whisper</code></p>
+          <p class="hint" style="margin-top:4px;">🌐 Dịch qua <strong>MyMemory API</strong> (miễn phí, không cần đăng ký)</p>
+        </div>
+
+        <div class="settings-section">
+          <div class="field-row">
+            <div class="field">
+              <span class="field-label">Source</span>
+              <select id="select-source-lang">
+                <option value="auto">Auto-detect</option>
+                <optgroup label="Popular">
+                  <option value="en">English</option>
+                  <option value="ja">Japanese</option>
+                  <option value="ko">Korean</option>
+                  <option value="zh">Chinese</option>
+                  <option value="vi">Vietnamese</option>
+                  <option value="fr">French</option>
+                  <option value="de">German</option>
+                  <option value="es">Spanish</option>
+                  <option value="th">Thai</option>
+                  <option value="id">Indonesian</option>
+                </optgroup>
+                <optgroup label="All Languages">
+                  <option value="af">Afrikaans</option>
+                  <option value="sq">Albanian</option>
+                  <option value="ar">Arabic</option>
+                  <option value="az">Azerbaijani</option>
+                  <option value="eu">Basque</option>
+                  <option value="be">Belarusian</option>
+                  <option value="bn">Bengali</option>
+                  <option value="bs">Bosnian</option>
+                  <option value="bg">Bulgarian</option>
+                  <option value="ca">Catalan</option>
+                  <option value="hr">Croatian</option>
+                  <option value="cs">Czech</option>
+                  <option value="da">Danish</option>
+                  <option value="nl">Dutch</option>
+                  <option value="et">Estonian</option>
+                  <option value="fi">Finnish</option>
+                  <option value="gl">Galician</option>
+                  <option value="el">Greek</option>
+                  <option value="gu">Gujarati</option>
+                  <option value="he">Hebrew</option>
+                  <option value="hi">Hindi</option>
+                  <option value="hu">Hungarian</option>
+                  <option value="it">Italian</option>
+                  <option value="kn">Kannada</option>
+                  <option value="kk">Kazakh</option>
+                  <option value="lv">Latvian</option>
+                  <option value="lt">Lithuanian</option>
+                  <option value="mk">Macedonian</option>
+                  <option value="ms">Malay</option>
+                  <option value="ml">Malayalam</option>
+                  <option value="mr">Marathi</option>
+                  <option value="no">Norwegian</option>
+                  <option value="fa">Persian</option>
+                  <option value="pl">Polish</option>
+                  <option value="pt">Portuguese</option>
+                  <option value="pa">Punjabi</option>
+                  <option value="ro">Romanian</option>
+                  <option value="ru">Russian</option>
+                  <option value="sr">Serbian</option>
+                  <option value="sk">Slovak</option>
+                  <option value="sl">Slovenian</option>
+                  <option value="sw">Swahili</option>
+                  <option value="sv">Swedish</option>
+                  <option value="tl">Tagalog</option>
+                  <option value="ta">Tamil</option>
+                  <option value="te">Telugu</option>
+                  <option value="tr">Turkish</option>
+                  <option value="uk">Ukrainian</option>
+                  <option value="ur">Urdu</option>
+                  <option value="cy">Welsh</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="field">
+              <span class="field-label">Target</span>
+              <select id="select-target-lang">
+                <optgroup label="Popular">
+                  <option value="vi">Vietnamese</option>
+                  <option value="en">English</option>
+                  <option value="ja">Japanese</option>
+                  <option value="ko">Korean</option>
+                  <option value="zh">Chinese</option>
+                  <option value="fr">French</option>
+                  <option value="de">German</option>
+                  <option value="es">Spanish</option>
+                  <option value="th">Thai</option>
+                  <option value="id">Indonesian</option>
+                </optgroup>
+                <optgroup label="All Languages">
+                  <option value="af">Afrikaans</option>
+                  <option value="sq">Albanian</option>
+                  <option value="ar">Arabic</option>
+                  <option value="az">Azerbaijani</option>
+                  <option value="eu">Basque</option>
+                  <option value="be">Belarusian</option>
+                  <option value="bn">Bengali</option>
+                  <option value="bs">Bosnian</option>
+                  <option value="bg">Bulgarian</option>
+                  <option value="ca">Catalan</option>
+                  <option value="hr">Croatian</option>
+                  <option value="cs">Czech</option>
+                  <option value="da">Danish</option>
+                  <option value="nl">Dutch</option>
+                  <option value="et">Estonian</option>
+                  <option value="fi">Finnish</option>
+                  <option value="gl">Galician</option>
+                  <option value="el">Greek</option>
+                  <option value="gu">Gujarati</option>
+                  <option value="he">Hebrew</option>
+                  <option value="hi">Hindi</option>
+                  <option value="hu">Hungarian</option>
+                  <option value="it">Italian</option>
+                  <option value="kn">Kannada</option>
+                  <option value="kk">Kazakh</option>
+                  <option value="lv">Latvian</option>
+                  <option value="lt">Lithuanian</option>
+                  <option value="mk">Macedonian</option>
+                  <option value="ms">Malay</option>
+                  <option value="ml">Malayalam</option>
+                  <option value="mr">Marathi</option>
+                  <option value="no">Norwegian</option>
+                  <option value="fa">Persian</option>
+                  <option value="pl">Polish</option>
+                  <option value="pt">Portuguese</option>
+                  <option value="pa">Punjabi</option>
+                  <option value="ro">Romanian</option>
+                  <option value="ru">Russian</option>
+                  <option value="sr">Serbian</option>
+                  <option value="sk">Slovak</option>
+                  <option value="sl">Slovenian</option>
+                  <option value="sw">Swahili</option>
+                  <option value="sv">Swedish</option>
+                  <option value="tl">Tagalog</option>
+                  <option value="ta">Tamil</option>
+                  <option value="te">Telugu</option>
+                  <option value="tr">Turkish</option>
+                  <option value="uk">Ukrainian</option>
+                  <option value="ur">Urdu</option>
+                  <option value="cy">Welsh</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <span class="field-label">Audio Source</span>
+          <div class="radio-group" id="audio-source-group">
+            <label class="radio-option"><input type="radio" name="audio-source" value="system" checked /><span class="radio-label">System</span></label>
+            <label class="radio-option"><input type="radio" name="audio-source" value="microphone" /><span class="radio-label">Mic</span></label>
+            <label class="radio-option"><input type="radio" name="audio-source" value="both" /><span class="radio-label">Both</span></label>
+          </div>
+        </div>
+
+        <div class="settings-section" id="section-soniox-context">
+          <span class="field-label">Context <span class="optional-badge">Optional</span></span>
+          <input type="text" id="input-context-domain" placeholder="e.g. Catholic sermon, Tech meeting..." style="margin-bottom: 8px;" />
+          <div class="terms-header">
+            <span class="hint" style="margin:0;">Translation terms</span>
+            <button type="button" id="btn-add-term" class="btn-icon-sm" title="Add term">+</button>
+          </div>
+          <div id="translation-terms-list"></div>
+        </div>
+      </div>
+
+      <!-- Tab: Display -->
+      <div class="settings-tab-content" id="tab-display">
+        <div class="settings-section">
+          <div class="slider-field">
+            <span class="field-label">Opacity</span>
+            <input type="range" id="range-opacity" min="20" max="100" value="85" />
+            <span id="opacity-value" class="range-value">85%</span>
+          </div>
+          <div class="slider-field">
+            <span class="field-label">Font Size</span>
+            <input type="range" id="range-font-size" min="12" max="140" value="16" />
+            <span id="font-size-value" class="range-value">16px</span>
+          </div>
+          <div class="slider-field">
+            <span class="field-label">Max Lines</span>
+            <input type="range" id="range-max-lines" min="2" max="15" value="5" />
+            <span id="max-lines-value" class="range-value">5</span>
+          </div>
+          <label class="checkbox-option" style="margin-top: 8px;">
+            <input type="checkbox" id="check-show-original" checked />
+            <span class="checkbox-label">Show original text</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Tab: TTS -->
+      <div class="settings-tab-content" id="tab-tts">
+        <div class="settings-section">
+          <span class="field-label">Provider</span>
+          <select id="select-tts-provider">
+            <optgroup label="🆓 Hoàn toàn miễn phí">
+              <option value="edge">🎙️ Edge TTS (Microsoft) — Free</option>
+              <option value="webspeech">🗣️ Web Speech API — Free (hệ thống)</option>
+              <option value="gtranslate">🌏 Google Translate TTS — Free</option>
+            </optgroup>
+            <optgroup label="🆓 Miễn phí (cần tài khoản)">
+              <option value="azure">☁️ Azure Neural TTS — Free 500K/tháng</option>
+            </optgroup>
+            <optgroup label="💰 Trả phí">
+              <option value="google">🌐 Google Chirp 3 HD — Premium</option>
+              <option value="elevenlabs">✨ ElevenLabs — Premium</option>
+            </optgroup>
+          </select>
+          <p class="hint" id="tts-provider-hint">Free, natural voices — no API key needed</p>
+        </div>
+
+        <!-- Edge TTS settings -->
+        <div class="settings-section" id="tts-edge-settings">
+          <div class="field">
+            <span class="field-label">Voice</span>
+            <select id="select-edge-voice">
+              <option value="vi-VN-HoaiMyNeural">HoaiMy — Nữ 🇻🇳</option>
+              <option value="vi-VN-NamMinhNeural">NamMinh — Nam 🇻🇳</option>
+              <option value="en-US-JennyNeural">Jenny — Female 🇺🇸</option>
+              <option value="en-US-GuyNeural">Guy — Male 🇺🇸</option>
+              <option value="ja-JP-NanamiNeural">Nanami — 女性 🇯🇵</option>
+              <option value="ko-KR-SunHiNeural">SunHi — 여성 🇰🇷</option>
+              <option value="zh-CN-XiaoxiaoNeural">Xiaoxiao — 女声 🇨🇳</option>
+            </select>
+          </div>
+          <div class="slider-field" style="margin-top: 8px;">
+            <span class="field-label">Speed</span>
+            <input type="range" id="range-edge-speed" min="-50" max="100" step="10" />
+            <span id="edge-speed-value" class="range-value"></span>
+          </div>
+        </div>
+
+        <!-- Google TTS settings -->
+        <div class="settings-section" id="tts-google-settings" style="display:none;">
+          <span class="field-label">Google Cloud API Key</span>
+          <div class="input-group">
+            <input type="password" id="input-google-tts-key" placeholder="AIzaSy..." autocomplete="off" />
+            <button id="btn-toggle-google-key" class="icon-btn small" title="Show/Hide">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+          <p class="hint">console.cloud.google.com → Enable Text-to-Speech API → Create API Key</p>
+          <div class="field" style="margin-top: 8px;">
+            <span class="field-label">Voice</span>
+            <select id="select-google-voice">
+              <optgroup label="🇻🇳 Vietnamese">
+                <option value="vi-VN-Chirp3-HD-Aoede">Aoede — Nữ</option>
+                <option value="vi-VN-Chirp3-HD-Kore">Kore — Nữ</option>
+                <option value="vi-VN-Chirp3-HD-Leda">Leda — Nữ</option>
+                <option value="vi-VN-Chirp3-HD-Charon">Charon — Nam</option>
+                <option value="vi-VN-Chirp3-HD-Fenrir">Fenrir — Nam</option>
+                <option value="vi-VN-Chirp3-HD-Puck">Puck — Nam</option>
+              </optgroup>
+              <optgroup label="🇺🇸 English">
+                <option value="en-US-Chirp3-HD-Aoede">Aoede — Female</option>
+                <option value="en-US-Chirp3-HD-Kore">Kore — Female</option>
+                <option value="en-US-Chirp3-HD-Charon">Charon — Male</option>
+                <option value="en-US-Chirp3-HD-Puck">Puck — Male</option>
+              </optgroup>
+              <optgroup label="🇯🇵 Japanese">
+                <option value="ja-JP-Chirp3-HD-Aoede">Aoede — 女性</option>
+                <option value="ja-JP-Chirp3-HD-Charon">Charon — 男性</option>
+              </optgroup>
+              <optgroup label="🇰🇷 Korean">
+                <option value="ko-KR-Chirp3-HD-Aoede">Aoede — 여성</option>
+                <option value="ko-KR-Chirp3-HD-Charon">Charon — 남성</option>
+              </optgroup>
+              <optgroup label="🇨🇳 Chinese">
+                <option value="cmn-CN-Chirp3-HD-Aoede">Aoede — 女声</option>
+                <option value="cmn-CN-Chirp3-HD-Charon">Charon — 男声</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="slider-field" style="margin-top: 8px;">
+            <span class="field-label">Speed</span>
+            <input type="range" id="range-google-speed" min="0.5" max="2.0" step="0.1" value="1.0" />
+            <span id="google-speed-value" class="range-value">1.0x</span>
+          </div>
+        </div>
+
+        <!-- ElevenLabs settings -->
+        <div class="settings-section" id="tts-elevenlabs-settings" style="display:none;">
+          <span class="field-label">ElevenLabs API Key</span>
+          <div class="input-group">
+            <input type="password" id="input-elevenlabs-key" placeholder="Enter key..." autocomplete="off" />
+            <button id="btn-toggle-elevenlabs-key" class="icon-btn small" title="Show/Hide">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+          <p class="hint">elevenlabs.io — Premium quality</p>
+          <div class="field" style="margin-top: 8px;">
+            <span class="field-label">Voice</span>
+            <select id="select-tts-voice">
+              <option value="21m00Tcm4TlvDq8ikWAM">Rachel — Female</option>
+              <option value="EXAVITQu4vr4xnSDxMaL">Sarah — Female</option>
+              <option value="onwK4e9ZLuTAKqWW03F9">Daniel — Male</option>
+              <option value="pNInz6obpgDQGcFmaJgB">Adam — Male</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Web Speech API settings -->
+        <div class="settings-section" id="tts-webspeech-settings" style="display:none;">
+          <p class="hint" style="margin-bottom:8px;">🆓 Dùng giọng đọc tích hợp sẵn trong hệ điều hành (macOS / Windows). Hoàn toàn miễn phí, không cần đăng ký.</p>
+          <div class="field">
+            <span class="field-label">Ngôn ngữ lọc giọng</span>
+            <select id="select-webspeech-lang">
+              <option value="vi">🇻🇳 Tiếng Việt</option>
+              <option value="en">🇺🇸 English</option>
+              <option value="ja">🇯🇵 日本語</option>
+              <option value="ko">🇰🇷 한국어</option>
+              <option value="zh">🇨🇳 中文</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="de">🇩🇪 Deutsch</option>
+            </select>
+          </div>
+          <div class="field" style="margin-top:8px;">
+            <span class="field-label">Giọng đọc</span>
+            <select id="select-webspeech-voice">
+              <option value="">(Tải danh sách giọng...)</option>
+            </select>
+          </div>
+          <div class="slider-field" style="margin-top:8px;">
+            <span class="field-label">Tốc độ</span>
+            <input type="range" id="range-webspeech-rate" min="0.5" max="2.0" step="0.1" value="1.1" />
+            <span id="webspeech-rate-value" class="range-value">1.1x</span>
+          </div>
+        </div>
+
+        <!-- Google Translate TTS settings -->
+        <div class="settings-section" id="tts-gtranslate-settings" style="display:none;">
+          <p class="hint" style="margin-bottom:8px;">🆓 Dùng giọng đọc từ Google Translate. Hoàn toàn miễn phí, không cần API key hay đăng ký tài khoản.</p>
+          <div class="field">
+            <span class="field-label">Ngôn ngữ đầu ra</span>
+            <select id="select-gtranslate-lang">
+              <option value="vi">🇻🇳 Tiếng Việt</option>
+              <option value="en">🇺🇸 English</option>
+              <option value="ja">🇯🇵 日本語</option>
+              <option value="ko">🇰🇷 한국어</option>
+              <option value="zh-CN">🇨🇳 中文 (Giản thể)</option>
+              <option value="zh-TW">🇹🇼 中文 (Phồn thể)</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="de">🇩🇪 Deutsch</option>
+              <option value="es">🇪🇸 Español</option>
+              <option value="it">🇮🇹 Italiano</option>
+              <option value="ru">🇷🇺 Русский</option>
+              <option value="th">🇹🇭 ภาษาไทย</option>
+              <option value="id">🇮🇩 Bahasa Indonesia</option>
+            </select>
+          </div>
+          <p class="hint" style="margin-top:8px;">⚠️ Đây là API không chính thức của Google Translate. Hoạt động tốt cho câu ngắn, phù hợp với dịch realtime.</p>
+        </div>
+
+        <!-- Azure Neural TTS settings -->
+        <div class="settings-section" id="tts-azure-settings" style="display:none;">
+          <p class="hint" style="margin-bottom:8px;">🆓 <strong>500.000 ký tự/tháng miễn phí</strong> với Azure Free Tier (F0). Không cần thẻ tín dụng — chỉ cần tài khoản Microsoft.</p>
+          <span class="field-label">Azure Subscription Key</span>
+          <div class="input-group">
+            <input type="password" id="input-azure-tts-key" placeholder="Nhập subscription key..." autocomplete="off" />
+            <button id="btn-toggle-azure-key" class="icon-btn small" title="Show/Hide">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+          <p class="hint"><a href="https://portal.azure.com" target="_blank">portal.azure.com</a> → Tạo resource "Speech" → Chọn tier F0 (Free) → Copy key</p>
+          <div class="field" style="margin-top:8px;">
+            <span class="field-label">Region</span>
+            <select id="select-azure-region">
+              <option value="eastus">East US</option>
+              <option value="eastasia">East Asia</option>
+              <option value="southeastasia">Southeast Asia</option>
+              <option value="westeurope">West Europe</option>
+              <option value="australiaeast">Australia East</option>
+              <option value="japaneast">Japan East</option>
+            </select>
+          </div>
+          <div class="field" style="margin-top:8px;">
+            <span class="field-label">Giọng đọc</span>
+            <select id="select-azure-voice">
+              <optgroup label="🇻🇳 Tiếng Việt">
+                <option value="vi-VN-HoaiMyNeural">HoaiMy — Nữ 🎀</option>
+                <option value="vi-VN-NamMinhNeural">NamMinh — Nam</option>
+              </optgroup>
+              <optgroup label="🇺🇸 English">
+                <option value="en-US-JennyNeural">Jenny — Female</option>
+                <option value="en-US-GuyNeural">Guy — Male</option>
+                <option value="en-US-AriaNeural">Aria — Female</option>
+                <option value="en-US-DavisNeural">Davis — Male</option>
+              </optgroup>
+              <optgroup label="🇯🇵 Japanese">
+                <option value="ja-JP-NanamiNeural">Nanami — 女性</option>
+                <option value="ja-JP-KeitaNeural">Keita — 男性</option>
+              </optgroup>
+              <optgroup label="🇰🇷 Korean">
+                <option value="ko-KR-SunHiNeural">SunHi — 여성</option>
+                <option value="ko-KR-InJoonNeural">InJoon — 남성</option>
+              </optgroup>
+              <optgroup label="🇨🇳 Chinese">
+                <option value="zh-CN-XiaoxiaoNeural">Xiaoxiao — 女声</option>
+                <option value="zh-CN-YunxiNeural">Yunxi — 男声</option>
+              </optgroup>
+              <optgroup label="🇫🇷 Français">
+                <option value="fr-FR-DeniseNeural">Denise — Femme</option>
+                <option value="fr-FR-HenriNeural">Henri — Homme</option>
+              </optgroup>
+              <optgroup label="🇩🇪 Deutsch">
+                <option value="de-DE-KatjaNeural">Katja — Weiblich</option>
+                <option value="de-DE-ConradNeural">Conrad — Männlich</option>
+              </optgroup>
+              <optgroup label="🇪🇸 Español">
+                <option value="es-ES-ElviraNeural">Elvira — Mujer</option>
+                <option value="es-ES-AlvaroNeural">Alvaro — Hombre</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="slider-field" style="margin-top:8px;">
+            <span class="field-label">Tốc độ</span>
+            <input type="range" id="range-azure-speed" min="-50" max="100" step="10" value="0" />
+            <span id="azure-speed-value" class="range-value">0%</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tab: About -->
+      <div class="settings-tab-content" id="tab-about">
+        <div class="settings-section about-info">
+          <div class="about-app-header">
+            <span class="about-app-name">My Translator</span>
+            <span class="about-app-version" id="about-version">v0.5.0</span>
+          </div>
+          <p class="hint">Real-time speech translator for macOS & Windows</p>
+        </div>
+
+        <div class="settings-section" id="section-update">
+          <span class="field-label">Updates</span>
+          <div id="update-status" class="update-status">
+            <span id="update-status-text">Click to check for updates</span>
+            <button id="btn-check-update" class="check-update-btn" title="Check now">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+            </button>
+          </div>
+          <div id="update-actions" style="margin-top:8px;display:none;">
+            <button id="btn-do-update" class="primary-btn update-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <span id="update-btn-text">Download & Install</span>
+            </button>
+          </div>
+          <div id="update-progress" class="update-progress" style="display:none;">
+            <div class="progress-bar"><div id="update-progress-fill" class="progress-fill"></div></div>
+            <span id="update-progress-pct" class="progress-pct">0%</span>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <span class="field-label">Links</span>
+          <div class="about-links">
+            <a href="#" id="link-github">GitHub Repository</a>
+            <a href="#" id="link-issues">Report a Bug</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save -->
+      <div class="settings-actions">
+        <button id="btn-save-settings" class="primary-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Save & Close
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- ═══════════════════ SETUP MODAL ═══════════════════ -->
+  <div id="setup-modal" class="modal-overlay" style="display:none">
+    <div class="modal-card">
+      <div class="modal-header">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z" />
+          <path d="M2 17l10 5 10-5" />
+          <path d="M2 12l10 5 10-5" />
+        </svg>
+        <h3>Setting up Local Models</h3>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-desc">Downloading and installing MLX models for offline translation. This is a one-time setup.</p>
+
+        <!-- Progress bar -->
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div id="setup-progress-fill" class="progress-fill"></div>
+          </div>
+          <span id="setup-progress-pct" class="progress-pct">0%</span>
+        </div>
+
+        <!-- Step indicators -->
+        <div class="setup-steps">
+          <div class="setup-step" id="step-check">
+            <span class="step-icon">⏳</span>
+            <span class="step-text">Checking Python</span>
+          </div>
+          <div class="setup-step" id="step-venv">
+            <span class="step-icon">⏳</span>
+            <span class="step-text">Creating environment</span>
+          </div>
+          <div class="setup-step" id="step-packages">
+            <span class="step-icon">⏳</span>
+            <span class="step-text">Installing packages</span>
+          </div>
+          <div class="setup-step" id="step-models">
+            <span class="step-icon">⏳</span>
+            <span class="step-text">Downloading models (~5GB)</span>
+          </div>
+        </div>
+
+        <!-- Current status -->
+        <div class="setup-status">
+          <span id="setup-status-text">Preparing...</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-cancel-setup" class="secondary-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/settings.js"></script>
+  <script type="module" src="/js/ui.js"></script>
+  <script type="module" src="/js/soniox.js"></script>
+  <script type="module" src="/js/elevenlabs-tts.js"></script>
+  <script type="module" src="/js/google-tts.js"></script>
+  <script type="module" src="/js/updater.js"></script>
+  <script type="module" src="/js/audio-player.js"></script>
+  <script type="module" src="/js/app.js"></script>
+</body>
+
+</html>
